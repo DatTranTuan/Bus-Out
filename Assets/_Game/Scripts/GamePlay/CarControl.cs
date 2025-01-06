@@ -1,14 +1,16 @@
+using DG.Tweening;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public class CarControl : MonoBehaviour
 {
+    private static CarControl currentMovingCar;
+
     [SerializeField] private CarType carType;
+
+    [SerializeField] private MeshRenderer meshRenderer;
+    [SerializeField] private ParticleSystem smoke;
 
     private int maxPassen;
     private int currentPassen;
@@ -18,8 +20,11 @@ public class CarControl : MonoBehaviour
     [SerializeField] private Transform leftCorner;
     [SerializeField] private Transform rightCorner;
 
+    [SerializeField] private Vector3 firstPos;
+
     [SerializeField] private float speed;
     [SerializeField] private float rotationSpeed;
+
     [SerializeField] private Text passenText;
 
     private bool isMoving = false;
@@ -33,14 +38,21 @@ public class CarControl : MonoBehaviour
     private bool isLeftTurnPass = false;
     private bool isRightTurnPass = false;
 
-    private bool isTouchPlate = false;
     private bool isLeaving = false;
 
     public int CurrentPassen { get => currentPassen; set => currentPassen = value; }
+    public int MaxPassen { get => maxPassen; set => maxPassen = value; }
+    public CarType CarType { get => carType; set => carType = value; }
+    public ColorType ColorType { get => colorType; set => colorType = value; }
+    public MeshRenderer MeshRenderer { get => meshRenderer; set => meshRenderer = value; }
+    public float Speed { get => speed; set => speed = value; }
+    public bool IsLeaving { get => isLeaving; set => isLeaving = value; }
 
     private void Awake()
     {
-        maxPassen = (int)carType;
+        firstPos = transform.position;
+
+        MaxPassen = (int)CarType;
         CurrentPassen = 0;
 
         UpdateText();
@@ -51,66 +63,75 @@ public class CarControl : MonoBehaviour
         if (isMoving)
         {
             // di chuyen khi bam vao
-            transform.Translate(Vector3.forward * speed * Time.deltaTime);
+            transform.Translate(Vector3.forward * Speed * Time.deltaTime);
+            smoke.gameObject.SetActive(true);
+        }
+        else
+        {
+            smoke.gameObject.SetActive(false);
         }
 
         if (isTurning)
         {
             if (isLeftBottom)
             {
-                transform.position = Vector3.MoveTowards(transform.position, new Vector3(leftCorner.position.x, 0f, leftCorner.position.z), speed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, new Vector3(leftCorner.position.x, 0f, leftCorner.position.z), Speed * Time.deltaTime);
                 //transform.rotation = Quaternion.Euler(transform.rotation.x, -90, transform.rotation.z);
 
-                Quaternion targetRotation = Quaternion.Euler(0, -90, 0);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
-
-                //Vector3 targetTransform = new Vector3(0, -90, 0);
-                //transform.rotation = Vector3.Lerp(transform.position,targetTransform, rotationSpeed * Time.deltaTime);
+                Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -90, transform.rotation.eulerAngles.z);
+                transform.DORotateQuaternion(targetRotation, 0.25f);
             }
             else if (isRightBottom)
             {
-                transform.position = Vector3.MoveTowards(transform.position, new Vector3(rightCorner.position.x, 0f, rightCorner.position.z), speed * Time.deltaTime);
-                transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
+                transform.position = Vector3.MoveTowards(transform.position, new Vector3(rightCorner.position.x, 0f, rightCorner.position.z), Speed * Time.deltaTime);
+                //transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
+
+                Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
+                transform.DORotateQuaternion(targetRotation, 0.25f);
             }
 
             if (isLeftTurnPass)
             {
-                transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
+                //transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
+
+                Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
+                transform.DORotateQuaternion(targetRotation, 0.10f);
             }
             else if (isRightTurnPass)
             {
-                transform.rotation = Quaternion.Euler(transform.rotation.x, -90, transform.rotation.z);
+                //transform.rotation = Quaternion.Euler(transform.rotation.x, -90, transform.rotation.z);
+
+                Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -90, transform.rotation.eulerAngles.z);
+                transform.DORotateQuaternion(targetRotation, 0.10f);
             }
 
             isTurning = false;
         }
 
-        if (isTouchPlate)
-        {
-            // do vao o mau Xam
-
-            var parent = LevelManager.Instance.ListPlate[LevelManager.Instance.Index].transform.GetChild(0);
-            var target = parent.transform.position;
-
-            float stepX = Mathf.MoveTowards(transform.position.x, target.x, 30 * Time.deltaTime);
-            float stepZ = Mathf.MoveTowards(transform.position.z, target.z, 30 * Time.deltaTime);
-
-            transform.position = new Vector3(stepX, transform.position.y, stepZ);
-            transform.rotation = Quaternion.Euler(transform.rotation.x, -208, transform.rotation.z);
-        }
-
-
     }
 
     private void OnMouseDown()
     {
-        Debug.Log("Click Carrr");
-        MoveStraightOut();
-    }
+        currentMovingCar = this;
 
-    public void BackMove()
-    {
-        // Quay lai cho cu
+        if (LevelManager.Instance.IsVIP)
+        {
+            if (LevelManager.Instance.VIPSlot.IsEmpty && !LevelManager.Instance.HeliCopTer.activeInHierarchy)
+            {
+                Debug.Log("VIPPPP");
+                //transform.position = LevelManager.Instance.VIPSlot.transform.position;
+
+                //Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -208, transform.rotation.eulerAngles.z);
+                //transform.DORotateQuaternion(targetRotation, 0.5f);
+
+                LevelManager.Instance.VIPHelicopter(this);
+            }
+        }
+        else
+        {
+            Debug.Log("Click Carrr");
+            MoveStraightOut();
+        }
     }
 
     public void MoveStraightOut()
@@ -122,35 +143,24 @@ public class CarControl : MonoBehaviour
 
     public void MoveStraightToPark()
     {
-        transform.rotation = Quaternion.Euler(transform.rotation.x, 0, transform.rotation.z);
-    }
+        //transform.rotation = Quaternion.Euler(transform.rotation.x, 0, transform.rotation.z);
 
-    //public void CheckPassenger()
-    //{
-    //    if (LevelManager.Instance.ListPassen.Count <= 0)
-    //    {
-    //        return;
-    //    }
-    //    else
-    //    {
-    //        if (LevelManager.Instance.ListPassen[0].ColorType == colorType)
-    //        {
-    //            LevelManager.Instance.ListPassen[0].MoveToCar();
-    //        }
-    //    }
-    //}
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 0, transform.rotation.eulerAngles.z);
+        transform.DORotateQuaternion(targetRotation, 0.25f);
+    }
 
     public void UpdateText()
     {
-        if (currentPassen <= maxPassen)
+        if (currentPassen <= MaxPassen)
         {
-            passenText.text = currentPassen + "/" + maxPassen;
+            passenText.text = currentPassen + "/" + MaxPassen;
 
-            if (currentPassen == maxPassen)
+            if (currentPassen == MaxPassen)
             {
-                isLeaving = true;
+                LevelManager.Instance.IsVIP = false;
+                IsLeaving = true;
                 isMoving = true;
-                StartCoroutine(DelayTurn(0.30f));
+                StartCoroutine(DelayTurn(0.20f));
                 LevelManager.Instance.SetPlateCollide();
             }
         }
@@ -159,7 +169,8 @@ public class CarControl : MonoBehaviour
     public IEnumerator DelayTurn(float delay)
     {
         yield return new WaitForSeconds(delay);
-        transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
+        transform.DORotateQuaternion(targetRotation, 0.25f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -167,17 +178,17 @@ public class CarControl : MonoBehaviour
         // Neu cham vao xe khac => 
 
         // Cham vao ria bai do xe =>
-        if (other.CompareTag("LeftBottom") && !isTurning && !isLeaving)
+        if (other.CompareTag("LeftBottom") && !isTurning && !IsLeaving)
         {
             isLeftBottom = true;
             isTurning = true;
         }
-        else if (other.CompareTag("RightBottom") && !isTurning && !isLeaving)
+        else if (other.CompareTag("RightBottom") && !isTurning && !IsLeaving)
         {
             isRightBottom = true;
             isTurning = true;
         }
-        else if (other.CompareTag("Left") || other.CompareTag("Right") && !isTurning && !isLeaving)
+        else if (other.CompareTag("Left") || other.CompareTag("Right") && !isTurning && !IsLeaving)
         {
             MoveStraightToPark();
         }
@@ -191,34 +202,81 @@ public class CarControl : MonoBehaviour
             MoveStraightToPark();
         }
 
-        if (other.CompareTag("LeftTurnPass") && !isTurning && !isLeaving)
+        if (other.CompareTag("LeftTurnPass") && !isTurning && !IsLeaving)
         {
             isLeftTurnPass = true;
             isTurning = true;
         }
-        else if (other.CompareTag("RightTurnPass") && !isTurning && !isLeaving)
+        else if (other.CompareTag("RightTurnPass") && !isTurning && !IsLeaving)
         {
             isRightTurnPass = true;
             isTurning = true;
         }
 
-        if (other.CompareTag("Plate") && !isLeaving)
+        if (other.CompareTag("Plate") && !IsLeaving)
         {
-            isTouchPlate = true;
+            Debug.Log("Plate Triggerrrrrr");
+
+            //LevelManager.Instance.SetNextCollider();
             isMoving = false;
+
+            ParkPlate parkPlate = other.GetComponent<ParkPlate>();
+
+            transform.DOMove(parkPlate.Destination.transform.position, 0.25f).SetEase(Ease.Linear);
+
+            parkPlate.Car = this;
+            parkPlate.BoxCollider.enabled = false;
         }
 
-        if (other.CompareTag("ParkSlot"))
+        if (other.CompareTag("ParkSlot") && !isTurning)
         {
-            isTouchPlate = false;
-            LevelManager.Instance.SetNextCollider();
+            isTurning = true;
+            Debug.Log("PlateSlotttttttttt Triggerrrrrr");
+
+            Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -208, transform.rotation.eulerAngles.z);
+            transform.DORotateQuaternion(targetRotation, 0.5f);
 
             ParkSlot parkPlate = other.GetComponent<ParkSlot>();
-            parkPlate.ColorType = colorType;
+            parkPlate.ColorType = ColorType;
             parkPlate.IsEmpty = false;
             parkPlate.Car = this;
 
-            LevelManager.Instance.CheckListPassen();
+
+            if (LevelManager.Instance.IsVIP)
+            {
+                LevelManager.Instance.ArrangeSkill();
+            }
+            else
+            {
+                LevelManager.Instance.CheckListCars();
+            }
+
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("ParkSlot") && IsLeaving)
+        {
+            ParkSlot parkSlot = other.GetComponent<ParkSlot>();
+            parkSlot.IsEmpty = true;
+            parkSlot.ParkPlate.BoxCollider.enabled = true;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Car"))
+        {
+            CarControl car = collision.gameObject.GetComponent<CarControl>();
+
+            if (car != currentMovingCar)
+            {
+                car.transform.DOShakeScale(0.2f, 1f, 10, 90f, true, ShakeRandomnessMode.Harmonic);
+            }
+
+            isMoving = false;
+            transform.DOMove(firstPos, 0.5f).SetEase(Ease.Linear);
         }
     }
 }

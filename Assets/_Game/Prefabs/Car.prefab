@@ -197,7 +197,7 @@ GameObject:
   - component: {fileID: 4845218725700889549}
   m_Layer: 0
   m_Name: Car
-  m_TagString: Untagged
+  m_TagString: Car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -216,6 +216,7 @@ Transform:
   m_Children:
   - {fileID: 4845218727314355552}
   - {fileID: 4783063451139323238}
+  - {fileID: 2433185197378017715}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
@@ -282,9 +283,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carType: 4
+  meshRenderer: {fileID: 4845218725700889559}
+  smoke: {fileID: 2433185197378017714}
   colorType: 2
   leftCorner: {fileID: 0}
   rightCorner: {fileID: 0}
+  firstPos: {x: 0, y: 0, z: 0}
   speed: 15
   rotationSpeed: 120
   passenText: {fileID: 8668352081261730673}
@@ -401,3 +405,82 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1001 &8046357026288709279
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 4845218725700889545}
+    m_Modifications:
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.31
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.42
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -180
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394157, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: ShapeModule.radius.value
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394157, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394159, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_Name
+      value: Smoke
+      objectReference: {fileID: 0}
+    - target: {fileID: 5651470108126394159, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+--- !u!198 &2433185197378017714 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5651470108126394157, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+  m_PrefabInstance: {fileID: 8046357026288709279}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2433185197378017715 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5651470108126394156, guid: eaf151d1d1e617840aabe4fbab69f50c, type: 3}
+  m_PrefabInstance: {fileID: 8046357026288709279}
+  m_PrefabAsset: {fileID: 0}
