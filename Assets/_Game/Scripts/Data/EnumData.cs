@@ -11,7 +11,8 @@ public enum ColorType
     Yellow = 4,
     Cyan = 5,
     Pink = 6,
-    Orange = 7
+    Orange = 7,
+    None = 8
 }
 
 public enum CarType

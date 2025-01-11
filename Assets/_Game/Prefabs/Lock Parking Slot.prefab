@@ -1,5 +1,68 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1282978423908597533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9213314868901737629}
+  - component: {fileID: 3840453892899089447}
+  - component: {fileID: 8597416166432315275}
+  m_Layer: 0
+  m_Name: True Park Slot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9213314868901737629
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282978423908597533}
+  m_LocalRotation: {x: -0, y: -0.000000022351742, z: 0.23366845, w: 0.9723164}
+  m_LocalPosition: {x: -0.091, y: 0.14, z: -0.494}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7340886194700213292}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 27.026}
+--- !u!65 &3840453892899089447
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282978423908597533}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.69761354, y: 1.4526877, z: 0.24839106}
+  m_Center: {x: 0.019044913, y: -0.17970885, z: 0.37580648}
+--- !u!114 &8597416166432315275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282978423908597533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f484eab6b9489c48a2c6aa8218926ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isLocked: 1
+  parkPlate: {fileID: 827138083377268272}
+  spriteRenderer: {fileID: 7340886195141957589}
+  unlockSprite: {fileID: 21300000, guid: 994ef220a221b3e44bde8ba3474da82f, type: 2}
+  destination: {fileID: 7340886194700213292}
 --- !u!1 &5803225026702220001
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,7 +207,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boxCollider: {fileID: 7340886194594370829}
-  destination: {fileID: 0}
+  parkSlot: {fileID: 8597416166432315275}
 --- !u!1 &7340886195141957587
 GameObject:
   m_ObjectHideFlags: 0
@@ -155,8 +218,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7340886194700213292}
   - component: {fileID: 7340886195141957589}
-  - component: {fileID: 6817480867105251083}
-  - component: {fileID: 7506332757518510036}
   m_Layer: 0
   m_Name: ParkSlot
   m_TagString: ParkSlot
@@ -175,7 +236,8 @@ Transform:
   m_LocalPosition: {x: -0.6199999, y: 1.4699999, z: 0.8}
   m_LocalScale: {x: 21, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 9213314868901737629}
   m_Father: {fileID: 7340886194594370826}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -231,32 +293,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6817480867105251083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7340886195141957587}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f484eab6b9489c48a2c6aa8218926ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isLocked: 1
-  parkPlate: {fileID: 827138083377268272}
-  spriteRenderer: {fileID: 7340886195141957589}
-  unlockSprite: {fileID: 21300000, guid: 994ef220a221b3e44bde8ba3474da82f, type: 2}
---- !u!65 &7506332757518510036
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7340886195141957587}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.227599, y: 1.5760926, z: 0.20000003}
-  m_Center: {x: -0.03771895, y: -0.016410679, z: 0.000000022351736}

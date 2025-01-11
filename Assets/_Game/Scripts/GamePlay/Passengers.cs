@@ -26,6 +26,8 @@ public class Passengers : MonoBehaviour
     public SkinnedMeshRenderer SkinnedMeshRenderer { get => skinnedMeshRenderer; set => skinnedMeshRenderer = value; }
     public float Speed { get => speed; set => speed = value; }
     public bool IsMoving { get => isMoving; set => isMoving = value; }
+    public string CurrentAnimName { get => currentAnimName; set => currentAnimName = value; }
+    public CarControl CarDestination { get => carDestination; set => carDestination = value; }
 
     private void Awake()
     {
@@ -42,50 +44,54 @@ public class Passengers : MonoBehaviour
 
     public void ChangeAnim(string animName)
     {
-        if (currentAnimName != animName)
-        {
-            anim.ResetTrigger(animName);
-            currentAnimName = animName;
-            anim.SetTrigger(currentAnimName);
-        }
+
+        /*anim.ResetTrigger(animName);
+        anim.SetTrigger(animName);*/
+
+        anim.Play(animName);
+
     }
 
-   
-
-    public void MoveToCar()
+    public void MoveToCar(CarControl carControl)
     {
-        carDestination = LevelManager.Instance.CheckParkingCar(colorType);
+        Sequence sequence = DOTween.Sequence();
 
-        //ChangeAnim("Run");
+        var carDestination = carControl.transform.position;
 
         if (carDestination != null)
         {
-            float secondDistance = Vector3.Distance(LevelManager.Instance.FirstMove.position, carDestination.transform.position);
+            Quaternion secondTargetRotation = Quaternion.LookRotation(carControl.transform.position - transform.position);
+            sequence.Append(transform.DORotateQuaternion(secondTargetRotation, 0.05f).SetEase(Ease.Linear));
 
-            transform.DOMove(LevelManager.Instance.FirstMove.position, 0.5f).SetEase(Ease.Linear).OnComplete(() =>
+            sequence.Append(transform.DOMove(LevelManager.Instance.FirstMove.position, 0.05f).SetEase(Ease.Linear));
+            IsMoving = true;
+
+            sequence.Append(transform.DOMove(carDestination, 0.25f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                IsMoving = true;
-                LevelManager.Instance.CheckListCars();
+                carControl.UpdateText();
 
-                Quaternion secondTargetRotation = Quaternion.LookRotation(carDestination.transform.position - transform.position);
-                transform.DORotateQuaternion(secondTargetRotation, 0.25f).SetEase(Ease.Linear);
-                transform.DOMove(carDestination.transform.position, 0.5f).SetEase(Ease.Linear).OnComplete(() =>
-                {
-                    LevelManager.Instance.ListPassen.RemoveAt(0);
-                    Destroy(gameObject);
-                    LevelManager.Instance.IsMoving = true;
-                    IsMoving = false;
-                    LevelManager.Instance.CheckListCars();
-                    carDestination.CurrentPassen++;
-                    carDestination.UpdateText();
-                    BuyingManager.Instance.Coin++;
-                    BuyingManager.Instance.UpdateCoin();
-                });
-            });
+                LevelManager.Instance.PassenCount--;
+
+                GameManager.Instance.UpdateCountSignText();
+                BuyingManager.Instance.Coin++;
+                BuyingManager.Instance.UpdateCoin();
+
+                //passen.IsMoving = false;
+
+                Destroy(gameObject);
+            }));
+
+
         }
         else
         {
             GameManager.Instance.CheckLosing();
         }
+    }
+
+    private void OnDestroy()
+    {
+        //LevelManager.Instance.MovingPassen();
+        //LevelManager.Instance.KillTween();
     }
 }

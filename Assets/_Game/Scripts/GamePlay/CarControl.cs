@@ -5,15 +5,20 @@ using UnityEngine.UI;
 
 public class CarControl : MonoBehaviour
 {
-    private static CarControl currentMovingCar;
+    public bool IsMax => currentPassen == maxPassen;
+
+    private static CarControl currentCar;
 
     [SerializeField] private CarType carType;
 
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private ParticleSystem smoke;
+    [SerializeField] private GameObject arrowMark;
 
     private int maxPassen;
     private int currentPassen;
+
+    private int currenTxtPassen = -1;
 
     [SerializeField] private ColorType colorType;
 
@@ -47,6 +52,7 @@ public class CarControl : MonoBehaviour
     public MeshRenderer MeshRenderer { get => meshRenderer; set => meshRenderer = value; }
     public float Speed { get => speed; set => speed = value; }
     public bool IsLeaving { get => isLeaving; set => isLeaving = value; }
+    public bool IsMoving { get => isMoving; set => isMoving = value; }
 
     private void Awake()
     {
@@ -60,7 +66,7 @@ public class CarControl : MonoBehaviour
 
     private void Update()
     {
-        if (isMoving)
+        if (IsMoving)
         {
             // di chuyen khi bam vao
             transform.Translate(Vector3.forward * Speed * Time.deltaTime);
@@ -79,7 +85,8 @@ public class CarControl : MonoBehaviour
                 //transform.rotation = Quaternion.Euler(transform.rotation.x, -90, transform.rotation.z);
 
                 Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -90, transform.rotation.eulerAngles.z);
-                transform.DORotateQuaternion(targetRotation, 0.25f);
+                transform.DORotateQuaternion(targetRotation, 0.10f);
+                isTurning = false;
             }
             else if (isRightBottom)
             {
@@ -87,7 +94,8 @@ public class CarControl : MonoBehaviour
                 //transform.rotation = Quaternion.Euler(transform.rotation.x, 90, transform.rotation.z);
 
                 Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
-                transform.DORotateQuaternion(targetRotation, 0.25f);
+                transform.DORotateQuaternion(targetRotation, 0.10f);
+                isTurning = false;
             }
 
             if (isLeftTurnPass)
@@ -96,6 +104,7 @@ public class CarControl : MonoBehaviour
 
                 Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
                 transform.DORotateQuaternion(targetRotation, 0.10f);
+                isLeftTurnPass = false;
             }
             else if (isRightTurnPass)
             {
@@ -103,16 +112,16 @@ public class CarControl : MonoBehaviour
 
                 Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -90, transform.rotation.eulerAngles.z);
                 transform.DORotateQuaternion(targetRotation, 0.10f);
+                isRightTurnPass = false;
             }
 
-            isTurning = false;
         }
 
     }
 
     private void OnMouseDown()
     {
-        currentMovingCar = this;
+        currentCar = this;
 
         if (LevelManager.Instance.IsVIP)
         {
@@ -129,7 +138,6 @@ public class CarControl : MonoBehaviour
         }
         else
         {
-            Debug.Log("Click Carrr");
             MoveStraightOut();
         }
     }
@@ -138,7 +146,7 @@ public class CarControl : MonoBehaviour
     {
         // Di thang roi bai do
 
-        isMoving = true;
+        IsMoving = true;
     }
 
     public void MoveStraightToPark()
@@ -146,24 +154,50 @@ public class CarControl : MonoBehaviour
         //transform.rotation = Quaternion.Euler(transform.rotation.x, 0, transform.rotation.z);
 
         Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 0, transform.rotation.eulerAngles.z);
-        transform.DORotateQuaternion(targetRotation, 0.25f);
+        transform.DORotateQuaternion(targetRotation, 0.10f);
     }
 
     public void UpdateText()
     {
-        if (currentPassen <= MaxPassen)
-        {
-            passenText.text = currentPassen + "/" + MaxPassen;
+        currenTxtPassen++;
 
-            if (currentPassen == MaxPassen)
-            {
-                LevelManager.Instance.IsVIP = false;
-                IsLeaving = true;
-                isMoving = true;
-                StartCoroutine(DelayTurn(0.20f));
-                LevelManager.Instance.SetPlateCollide();
-            }
+        if (currenTxtPassen < MaxPassen)
+        {
+            passenText.text = currenTxtPassen + "/" + MaxPassen;
+
+            //if (currentPassen > 0)
+            //{
+            //    LevelManager.Instance.CarChecking(ColorType, this);
+            //}
         }
+        else if (currenTxtPassen == MaxPassen)
+        {
+            LevelManager.Instance.IsVIP = false;
+
+            //Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -208, transform.rotation.eulerAngles.z);
+            transform.rotation = Quaternion.Euler(transform.rotation.x, -208, transform.rotation.z);
+
+            IsLeaving = true;
+            IsMoving = true;
+            StartCoroutine(DelayTurn(0.10f));
+
+            passenText.gameObject.SetActive(false);
+            //LevelManager.Instance.SetPlateCollide();
+        }
+
+    }
+
+    public bool FillPassenger(Passengers passen)
+    {
+        if (!IsMax)
+        {
+            currentPassen++;
+
+            passen.MoveToCar(this);
+            //LevelManager.Instance.CarTakePassen(passen, this);
+        }
+
+        return IsMax;
     }
 
     public IEnumerator DelayTurn(float delay)
@@ -171,6 +205,7 @@ public class CarControl : MonoBehaviour
         yield return new WaitForSeconds(delay);
         Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, 90, transform.rotation.eulerAngles.z);
         transform.DORotateQuaternion(targetRotation, 0.25f);
+        Destroy(gameObject, 3f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -206,50 +241,66 @@ public class CarControl : MonoBehaviour
         {
             isLeftTurnPass = true;
             isTurning = true;
+            gameObject.tag = "Untagged";
         }
         else if (other.CompareTag("RightTurnPass") && !isTurning && !IsLeaving)
         {
             isRightTurnPass = true;
             isTurning = true;
+            gameObject.tag = "Untagged";
         }
 
         if (other.CompareTag("Plate") && !IsLeaving)
         {
-            Debug.Log("Plate Triggerrrrrr");
-
             //LevelManager.Instance.SetNextCollider();
-            isMoving = false;
+            IsMoving = false;
 
             ParkPlate parkPlate = other.GetComponent<ParkPlate>();
 
-            transform.DOMove(parkPlate.Destination.transform.position, 0.25f).SetEase(Ease.Linear);
+            if (parkPlate.ParkSlot.IsEmpty)
+            {
+                parkPlate.ParkSlot.Car = this;
+            }
+
+            parkPlate.ParkSlot.IsEmpty = false;
+            parkPlate.ParkSlot.ColorType = ColorType;
+
+
+            transform.DOMove(parkPlate.ParkSlot.Destination.position, 0.10f).SetEase(Ease.Linear);
+            Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -385, transform.rotation.eulerAngles.z);
+            transform.DORotateQuaternion(targetRotation, 0.10f).OnComplete(() =>
+            {
+                passenText.gameObject.SetActive(true);
+                arrowMark.SetActive(false);
+
+                if (LevelManager.Instance.IsVIP)
+                {
+                    LevelManager.Instance.ArrangeSkill();
+                }
+                else
+                {
+                    //LevelManager.Instance.CarChecking(this);
+                    LevelManager.Instance.CheckPassenger(this);
+                }
+            });
 
             parkPlate.Car = this;
             parkPlate.BoxCollider.enabled = false;
+
         }
 
-        if (other.CompareTag("ParkSlot") && !isTurning)
+        if (other.CompareTag("ParkSlot") && !isLeaving)
         {
-            isTurning = true;
-            Debug.Log("PlateSlotttttttttt Triggerrrrrr");
+            ParkSlot parkSlot = other.GetComponent<ParkSlot>();
+            Debug.Log(other.gameObject.name);
+            parkSlot.ColorType = ColorType;
 
-            Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -208, transform.rotation.eulerAngles.z);
-            transform.DORotateQuaternion(targetRotation, 0.5f);
+            //if (parkPlate.IsEmpty)
+            //{
+            //    parkPlate.Car = this;
+            //}
 
-            ParkSlot parkPlate = other.GetComponent<ParkSlot>();
-            parkPlate.ColorType = ColorType;
-            parkPlate.IsEmpty = false;
-            parkPlate.Car = this;
-
-
-            if (LevelManager.Instance.IsVIP)
-            {
-                LevelManager.Instance.ArrangeSkill();
-            }
-            else
-            {
-                LevelManager.Instance.CheckListCars();
-            }
+            //parkPlate.IsEmpty = false;
 
         }
     }
@@ -270,13 +321,18 @@ public class CarControl : MonoBehaviour
         {
             CarControl car = collision.gameObject.GetComponent<CarControl>();
 
-            if (car != currentMovingCar)
+            if (car != currentCar)
             {
-                car.transform.DOShakeScale(0.2f, 1f, 10, 90f, true, ShakeRandomnessMode.Harmonic);
-            }
+                //car.transform.DOShakeScale(0.2f, 1f, 10, 90f, true, ShakeRandomnessMode.Harmonic);
+                //car.transform.DOShakePosition(0.5f, 1f, 10, 90f, false, true, ShakeRandomnessMode.Harmonic);
 
-            isMoving = false;
-            transform.DOMove(firstPos, 0.5f).SetEase(Ease.Linear);
+                //car.transform.DORotate(new Vector3(0, 0f, 15f), 2f)
+                //         .SetEase(Ease.InOutSine)
+                //         .SetLoops(-1, LoopType.Yoyo);
+
+                IsMoving = false;
+                transform.DOMove(firstPos, 0.5f).SetEase(Ease.Linear);
+            }
         }
     }
 }

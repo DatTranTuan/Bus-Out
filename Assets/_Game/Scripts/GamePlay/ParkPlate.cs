@@ -5,7 +5,7 @@ using UnityEngine;
 public class ParkPlate : Singleton<ParkPlate>
 {
     [SerializeField] private BoxCollider boxCollider;
-    [SerializeField] private ParkSlot destination;
+    [SerializeField] private ParkSlot parkSlot;
 
     private CarControl car;
 
@@ -22,6 +22,6 @@ public class ParkPlate : Singleton<ParkPlate>
 
 
     public BoxCollider BoxCollider { get => boxCollider; set => boxCollider = value; }
-    public ParkSlot Destination { get => destination; set => destination = value; }
+    public ParkSlot ParkSlot { get => parkSlot; set => parkSlot = value; }
     public CarControl Car { get => car; set => car = value; }
 }

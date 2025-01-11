@@ -6,6 +6,9 @@ using DG.Tweening;
 
 public class LevelManager : Singleton<LevelManager>
 {
+    private Dictionary<ColorType, Queue<CarControl>> dictCar = new Dictionary<ColorType, Queue<CarControl>>();
+    private bool isProgress;
+    
     [SerializeField] private GameObject heliCopTer;
     [SerializeField] private Transform heliStartPos;
     [SerializeField] private Transform heliEndPos;
@@ -33,9 +36,10 @@ public class LevelManager : Singleton<LevelManager>
     private bool isMoving = false;
     [SerializeField] private bool isVIP = false;
 
-    private int index = 0;
+    private int passenCount = 0;
 
-    public int Index { get => index; set => index = value; }
+    Sequence sequence;
+
     public List<Passengers> ListPassen { get => listPassen; set => listPassen = value; }
     public List<ParkPlate> ListPlate { get => listPlate; set => listPlate = value; }
     public Transform FirstMove { get => firstMove; set => firstMove = value; }
@@ -44,56 +48,79 @@ public class LevelManager : Singleton<LevelManager>
     public ParkSlot VIPSlot { get => vIPSlot; set => vIPSlot = value; }
     public List<ParkSlot> ListParkSlot { get => listParkSlot; set => listParkSlot = value; }
     public GameObject HeliCopTer { get => heliCopTer; set => heliCopTer = value; }
+    public int PassenCount { get => passenCount; set => passenCount = value; }
+    public Vector3[] PassenArray { get => passenArray; set => passenArray = value; }
 
     private void Start()
     {
-        passenArray = new Vector3[42];
+        sequence = DOTween.Sequence();
+
+        PassenArray = new Vector3[42];
 
         SpawnPassen();
 
-        SetPlateCollide();
+        GameManager.Instance.UpdateCountSignText();
+
+        //SetPlateCollide();
     }
 
     private void Update()
     {
-        if (IsMoving)
-        {
-            MovingPassen();
-        }
+        //if (IsMoving)
+        //{
+        //    MovingPassen();
+        //}
     }
 
-    private void MovingPassen()
+    public void MovingPassen()
     {
-        for (int i = 0; i < listPassen.Count; i++)
-        {
-            Passengers currentObject = listPassen[i];
-            Vector3 targetPosition = passenArray[i];
+        Vector3 targetPosition;
 
-            if (Vector3.Distance(currentObject.transform.position, targetPosition) > 0.01f)
+        for (int i = 0; i < ListPassen.Count; i++)
+        {
+            Passengers currentObject;
+
+            currentObject = ListPassen[i];
+            targetPosition = PassenArray[i];
+
+            currentObject.ChangeAnim("Run");
+
+            currentObject.transform.DOMove(targetPosition, 0.11f).SetEase(Ease.Linear).OnComplete(() =>
             {
-                listPassen[i].ChangeAnim("Run");
-                currentObject.transform.position = Vector3.MoveTowards(currentObject.transform.position, targetPosition, listPassen[i].Speed * Time.deltaTime);
-            }
-            else
-            {
-                listPassen[i].ChangeAnim("Idle");
-            }
+                currentObject.ChangeAnim("Idle");
+            });
         }
     }
+
 
     public void ArrangeSkill()
     {
         if (ListParkSlot[0].Car != null && !isVIP)
         {
             ChangeArrangePassenColorPos(ListParkSlot[0].ColorType);
+            //CheckPassenger(listParkSlot[0].Car);
+
+            CheckArrangeSkill();
         }
         else if (isVIP)
         {
             ChangeVIPPassenColorPos(vIPSlot.Car.ColorType);
+            CheckPassenger(vIPSlot.Car);
         }
         else
         {
             return;
+        }
+    }
+
+    public void CheckArrangeSkill()
+    {
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (!listParkSlot[i].IsEmpty)
+            {
+                CheckPassenger(listParkSlot[i].Car);
+            }
         }
     }
 
@@ -119,11 +146,12 @@ public class LevelManager : Singleton<LevelManager>
         }
 
         ChangePassenPosSkill();
-        CheckListCars();
     }
 
     public void ChangeVIPPassenColorPos(ColorType colorType)
     {
+        int index = 0;
+
         for (int i = 0; i < listPassen.Count; i++)
         {
             if (listPassen[i].ColorType == colorType && index < vIPSlot.Car.MaxPassen)
@@ -142,7 +170,6 @@ public class LevelManager : Singleton<LevelManager>
         }
 
         ChangePassenPosSkill();
-        CheckListCars();
     }
 
     public void VIPHelicopter(CarControl car)
@@ -159,36 +186,36 @@ public class LevelManager : Singleton<LevelManager>
         float t2 = Vector3.Distance(vipPos, HeliCopTer.transform.position) / speed;
         float t3 = Vector3.Distance(endHeliPos, HeliCopTer.transform.position) / speed;
 
-        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -208, transform.rotation.eulerAngles.z);
+        Quaternion targetRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, -385, transform.rotation.eulerAngles.z);
 
         HeliCopTer.transform.position = heliStartPos.transform.position;
 
-        Sequence sequence = DOTween.Sequence();
+        Sequence sequence1 = DOTween.Sequence();
 
-        sequence.Append(HeliCopTer.transform.DOMove(carPos, t1).SetEase(Ease.InOutCubic).OnComplete(() =>
+        sequence1.Append(HeliCopTer.transform.DOMove(carPos, t1).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
             vipPos = new Vector3(vIPSlot.transform.position.x, HeliCopTer.transform.position.y, vIPSlot.transform.position.z);
             t2 = Vector3.Distance(vipPos, HeliCopTer.transform.position) / speed;
         }));
 
-        sequence.Append(car.transform.DOMoveY(3f, 1f).SetEase(Ease.Linear).OnComplete(() =>
+        sequence1.Append(car.transform.DOMoveY(3f, 1f).SetEase(Ease.Linear).OnComplete(() =>
         {
             car.transform.SetParent(HeliCopTer.transform);
         }));
 
-        sequence.Append(HeliCopTer.transform.DOMove(vipPos, t2).SetEase(Ease.InOutCubic));
-        sequence.Append(car.transform.DORotateQuaternion(targetRotation, 0.5f));
-        sequence.Append(car.transform.DOMoveY(0f, 1f).SetEase(Ease.Linear).OnComplete(() =>
+        sequence1.Append(HeliCopTer.transform.DOMove(vipPos, t2).SetEase(Ease.InOutCubic));
+        sequence1.Append(car.transform.DORotateQuaternion(targetRotation, 0.5f));
+        sequence1.Append(car.transform.DOMoveY(0f, 1f).SetEase(Ease.Linear).OnComplete(() =>
         {
             car.transform.SetParent(null);
             t3 = Vector3.Distance(endHeliPos, HeliCopTer.transform.position) / speed;
         }));
 
-        sequence.Append(HeliCopTer.transform.DOMove(endHeliPos, t3).SetEase(Ease.InOutCubic));
-        sequence.OnComplete(() =>
+        sequence1.Append(HeliCopTer.transform.DOMove(endHeliPos, t3).SetEase(Ease.InOutCubic));
+        sequence1.OnComplete(() =>
         {
             HeliCopTer.transform.position = heliStartPos.transform.position;
-            sequence.Kill();
+            sequence1.Kill();
             HeliCopTer.SetActive(false);
         });
     }
@@ -198,16 +225,16 @@ public class LevelManager : Singleton<LevelManager>
         for (int i = 0; i < listPassen.Count; i++)
         {
             Passengers currentObject = listPassen[i];
-            Vector3 targetPosition = passenArray[i];
+            Vector3 targetPosition = PassenArray[i];
 
             if (Vector3.Distance(currentObject.transform.position, targetPosition) > 0.01f)
             {
-                listPassen[i].ChangeAnim("Run");
+                //listPassen[i].ChangeAnim("Run");
                 currentObject.transform.position = targetPosition;
             }
             else
             {
-                listPassen[i].ChangeAnim("Idle");
+                //listPassen[i].ChangeAnim("Idle");
             }
 
         }
@@ -266,18 +293,6 @@ public class LevelManager : Singleton<LevelManager>
         }
     }
 
-    public void SetPlateCollide()
-    {
-        index = 0;
-
-        //ListPlate[0].BoxCollider.enabled = true;
-
-        //for (int i = 1; i < ListPlate.Count; i++)
-        //{
-        //    ListPlate[i].BoxCollider.enabled = false;
-        //}
-    }
-
     public void SpawnPassen()
     {
         // Sinh ra hanh khach
@@ -309,25 +324,12 @@ public class LevelManager : Singleton<LevelManager>
             }
 
             ListPassen.Add(passen);
-            passenArray[i - 1] = new Vector3(passen.transform.position.x, passen.transform.position.y, passen.transform.position.z);
+            PassenArray[i - 1] = new Vector3(passen.transform.position.x, passen.transform.position.y, passen.transform.position.z);
 
             passen.transform.rotation = Quaternion.Euler(0, -90, 0);
             passen.transform.SetParent(spawnPos.transform);
-        }
-    }
 
-    public void SetNextCollider()
-    {
-        if (index < listPlate.Count)
-        {
-            ListPlate[index].BoxCollider.enabled = false;
-
-            index++;
-
-            if (index < listPlate.Count)
-            {
-                ListPlate[index].BoxCollider.enabled = true;
-            }
+            PassenCount++;
         }
     }
 
@@ -336,46 +338,164 @@ public class LevelManager : Singleton<LevelManager>
         ListParkSlot.Add(parkSlot);
         parkSlot.SpriteRenderer.sprite = parkSlot.UnlockSprite;
         parkSlot.IsLocked = false;
+        parkSlot.ParkPlate.BoxCollider.enabled = true;
     }
 
-    public CarControl CheckParkingCar(ColorType colorType)
+    public void CheckPassenger(CarControl car)
     {
-        if (isVIP)
+        var color = car.ColorType;
+
+        if (!dictCar.ContainsKey(color))
         {
-            if (vIPSlot.ColorType == colorType)
-            {
-                return vIPSlot.Car;
-            }
+            dictCar.Add(color, new Queue<CarControl>());
         }
 
-        for (int i = 0; i < ListParkSlot.Count; i++)
+        dictCar[color].Enqueue(car);
+
+        if (!isProgress)
         {
-            if (!ListParkSlot[i].IsEmpty && ListParkSlot[i].ColorType == colorType)
+            isProgress = true;
+            StartCoroutine(FillPassenger(car));
+        }
+    }
+
+    public IEnumerator FillPassenger(CarControl car)
+    {
+        var color = car.ColorType;
+
+        var passenColor = GetFirstPassenColor();
+
+        while (color == passenColor)
+        {
+            MovingPassen();
+
+            if (car.IsMax)
             {
-                if (!listParkSlot[i].Car.IsLeaving && listParkSlot[i].Car.CurrentPassen < listParkSlot[i].Car.MaxPassen)
+                dictCar.TryGetValue(color, out Queue<CarControl> value);
+
+                if (value == null || value.Count == 0)
                 {
-                    return ListParkSlot[i].Car;
+                    break;
+                }
+                else
+                {
+                    car = value.Peek();
+                    color = car.ColorType;
                 }
             }
+
+            bool isMax = car.FillPassenger(listPassen[0]);
+            //yield return new WaitForSeconds(0.76f);
+
+
+            if (isMax)
+            {
+                //StartCoroutine(car.DelayTurn(0.1f));
+                dictCar[color].Dequeue();
+            }
+            
+            listPassen.RemoveAt(0);
+
+            passenColor = GetFirstPassenColor();
+
+            if (color != passenColor)
+            {
+                dictCar.TryGetValue(passenColor, out Queue<CarControl> value);
+
+
+                if (value == null || value.Count == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    car = value.Peek();
+                    color = car.ColorType;
+                }
+            }
+
+            //yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.11f);
         }
 
-        return null;
-    }
+        isProgress = false;
 
-    public void CheckListCars()
-    {
+        yield return new WaitForSeconds(0.36f);
+
         if (ListPassen.Count <= 0)
         {
-            return;
-        }
-        else if (listPassen[0].IsMoving)
-        {
-            listPassen[1].MoveToCar();
-        }
-        else
-        {
-            ListPassen[0].MoveToCar();
+            GameManager.Instance.WinningPanel.SetActive(true);
         }
     }
+
+    private ColorType GetFirstPassenColor()
+    {
+        if (listPassen.Count > 0)
+        {
+            return listPassen[0].ColorType;
+        }
+
+        return ColorType.None;
+    }
+
+    //public void CarChecking(CarControl car)
+    //{
+    //    //StartCoroutine(DelayCarTake(car));
+
+    //    if (listPassen[0].ColorType == car.ColorType && !listPassen[0].IsMoving)
+    //    {
+    //        CarTakePassen(listPassen[0], car);
+    //    }
+
+    //    //else if (listPassen[0].IsMoving && listPassen[1].ColorType == car.ColorType)
+    //    //{
+    //    //    CarTakePassen(listPassen[1], car);
+    //    //}
+    //    //else
+    //    //{
+    //    //    return;
+    //    //}
+
+    //}
+
+    //public void PassenChecking(Passengers passen)
+    //{
+    //    for (int i = 0; i < listParkSlot.Count; i++)
+    //    {
+    //        if (listParkSlot[i].Car != null)
+    //        {
+    //            if (listParkSlot[i].Car.ColorType == passen.ColorType && listParkSlot[i].Car.CurrentPassen < listParkSlot[i].Car.MaxPassen)
+    //            {
+    //                //CarTakePassen(passen, listParkSlot[i].Car);
+    //                StartCoroutine(DelayCarTake(listParkSlot[i].Car));
+    //                return;
+    //            }
+    //        }
+    //    }
+    //}
+
+    //public IEnumerator DelayCarTake(CarControl carControl)
+    //{
+    //    int index = 0;
+
+    //    for (int i = 0; i < listPassen.Count; i++)
+    //    {
+    //        if (listPassen[i].ColorType == carControl.ColorType && i == index && index < carControl.MaxPassen)
+    //        {
+    //            if (carControl.CurrentPassen < carControl.MaxPassen)
+    //            {
+    //                index++;
+    //                CarTakePassen(listPassen[i], carControl);
+
+    //                isMoving = true;
+    //                yield return new WaitForSeconds(0.1f);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            yield break;
+    //        }
+    //    }
+    //}
 
 }

@@ -1,5 +1,68 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2715961517374946365
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8165243554509768478}
+  - component: {fileID: 3930051527611361914}
+  - component: {fileID: 6993845398637571945}
+  m_Layer: 0
+  m_Name: True Park Slot
+  m_TagString: ParkSlot
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8165243554509768478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2715961517374946365}
+  m_LocalRotation: {x: -0, y: -0.00000004470348, z: 0.2284512, w: 0.9735553}
+  m_LocalPosition: {x: 0.151, y: -0.257, z: -0.372}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7340886194700213292}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 26.412}
+--- !u!65 &3930051527611361914
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2715961517374946365}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.8076823, y: 1.4921958, z: 0.13894506}
+  m_Center: {x: -0.0058457353, y: 0.30328724, z: 0.4305277}
+--- !u!114 &6993845398637571945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2715961517374946365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f484eab6b9489c48a2c6aa8218926ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isLocked: 0
+  parkPlate: {fileID: 827138083377268272}
+  spriteRenderer: {fileID: 0}
+  unlockSprite: {fileID: 0}
+  destination: {fileID: 7340886194700213292}
 --- !u!1 &4854438807719767543
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,7 +238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boxCollider: {fileID: 7340886194594370829}
-  destination: {fileID: 6817480867105251083}
+  parkSlot: {fileID: 6993845398637571945}
 --- !u!1 &7340886195141957587
 GameObject:
   m_ObjectHideFlags: 0
@@ -186,8 +249,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7340886194700213292}
   - component: {fileID: 7340886195141957589}
-  - component: {fileID: 6817480867105251083}
-  - component: {fileID: 807445194398804437}
   m_Layer: 0
   m_Name: ParkSlot
   m_TagString: ParkSlot
@@ -208,6 +269,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7373680513092711505}
+  - {fileID: 8165243554509768478}
   m_Father: {fileID: 7340886194594370826}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -263,32 +325,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &6817480867105251083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7340886195141957587}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f484eab6b9489c48a2c6aa8218926ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isLocked: 0
-  parkPlate: {fileID: 827138083377268272}
-  spriteRenderer: {fileID: 0}
-  unlockSprite: {fileID: 0}
---- !u!65 &807445194398804437
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7340886195141957587}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.2282307, y: 1.4311079, z: 0.20000003}
-  m_Center: {x: 0.038725987, y: 0.09065856, z: 0.000000014901158}
