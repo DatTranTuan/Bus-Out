@@ -1,9 +1,12 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameManager : Singleton<GameManager> 
+public class GameManager : Singleton<GameManager>
 {
+    [SerializeField] private float touchTime;
+
     [SerializeField] private Text countSignText;
 
     [SerializeField] private GameObject winningPanel;
@@ -13,10 +16,14 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private Button playAgainBtn2;
 
     public GameObject WinningPanel { get => winningPanel; set => winningPanel = value; }
+    public GameObject LosingPanel { get => losingPanel; set => losingPanel = value; }
+    public float TouchTime { get => touchTime; set => touchTime = value; }
 
     private void Awake()
     {
-        Input.multiTouchEnabled = true;
+        Input.multiTouchEnabled = false;
+
+        //DOTween.SetTweensCapacity(500, 125);
 
         //target frame rate ve 60 fps
         Application.targetFrameRate = 60;
@@ -30,6 +37,7 @@ public class GameManager : Singleton<GameManager>
         {
             Screen.SetResolution(Mathf.RoundToInt(ratio * (float)maxScreenHeight), maxScreenHeight, true);
         }
+
     }
 
     private void Start()
@@ -38,27 +46,19 @@ public class GameManager : Singleton<GameManager>
         playAgainBtn2.onClick.AddListener(ClickPlayAgain);
     }
 
+    private void Update()
+    {
+        touchTime = Time.time;
+    }
+
     public void ClickPlayAgain()
     {
         SceneManager.LoadScene("SampleScene");
     }
 
-    public void CheckLosing()
+    public void Losing()
     {
-        int index = 0;
-
-        for (int i = 0; i < LevelManager.Instance.ListParkSlot.Count; i++)
-        {
-            if (!LevelManager.Instance.ListParkSlot[i].IsEmpty)
-            {
-                index++;
-                
-                if (index == LevelManager.Instance.ListParkSlot.Count)
-                {
-                    losingPanel.gameObject.SetActive(true);
-                }
-            }
-        }
+        LosingPanel.gameObject.SetActive(true);
     }
 
     public void UpdateCountSignText()

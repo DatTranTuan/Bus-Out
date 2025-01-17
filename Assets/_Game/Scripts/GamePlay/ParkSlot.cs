@@ -35,4 +35,12 @@ public class ParkSlot : MonoBehaviour
 
         }
     }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other == car)
+        {
+            isEmpty = true;
+        }
+    }
 }

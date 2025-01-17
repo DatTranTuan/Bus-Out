@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-
+using System.Linq;
 
 public class LevelManager : Singleton<LevelManager>
 {
     private Dictionary<ColorType, Queue<CarControl>> dictCar = new Dictionary<ColorType, Queue<CarControl>>();
     private bool isProgress;
-    
+
     [SerializeField] private GameObject heliCopTer;
     [SerializeField] private Transform heliStartPos;
     [SerializeField] private Transform heliEndPos;
@@ -18,13 +18,14 @@ public class LevelManager : Singleton<LevelManager>
     [SerializeField] private List<Material> listBusMaterial = new List<Material>();
 
     [SerializeField] private List<CarControl> listCars = new List<CarControl>();
-
+    [SerializeField] private List<CarControl> listAllCars = new List<CarControl>();
 
     [SerializeField] private List<ParkPlate> listPlate = new List<ParkPlate>();
     [SerializeField] private List<ParkSlot> listParkSlot = new List<ParkSlot>();
 
     [SerializeField] private List<Passengers> listPassen = new List<Passengers>();
     [SerializeField] private Vector3[] passenArray;
+    private int passenArrayIndex;
 
     [SerializeField] private Passengers passenPrefabs;
 
@@ -33,43 +34,36 @@ public class LevelManager : Singleton<LevelManager>
 
     [SerializeField] private ParkSlot vIPSlot;
 
-    private bool isMoving = false;
     [SerializeField] private bool isVIP = false;
+
+    [SerializeField] private CarControl carCenter;
+    [SerializeField] private GameObject allCars;
+
+    [SerializeField] private float rayDistance;
+    [SerializeField] private LayerMask layerMask;
 
     private int passenCount = 0;
 
-    Sequence sequence;
+    private int carTouchCount = 0;
 
     public List<Passengers> ListPassen { get => listPassen; set => listPassen = value; }
     public List<ParkPlate> ListPlate { get => listPlate; set => listPlate = value; }
     public Transform FirstMove { get => firstMove; set => firstMove = value; }
-    public bool IsMoving { get => isMoving; set => isMoving = value; }
     public bool IsVIP { get => isVIP; set => isVIP = value; }
     public ParkSlot VIPSlot { get => vIPSlot; set => vIPSlot = value; }
     public List<ParkSlot> ListParkSlot { get => listParkSlot; set => listParkSlot = value; }
     public GameObject HeliCopTer { get => heliCopTer; set => heliCopTer = value; }
     public int PassenCount { get => passenCount; set => passenCount = value; }
     public Vector3[] PassenArray { get => passenArray; set => passenArray = value; }
+    public int CarTouchCount { get => carTouchCount; set => carTouchCount = value; }
 
     private void Start()
     {
-        sequence = DOTween.Sequence();
+        CheckPassenArrayLength();
 
-        PassenArray = new Vector3[42];
-
-        SpawnPassen();
+        AddCarsToList();
 
         GameManager.Instance.UpdateCountSignText();
-
-        //SetPlateCollide();
-    }
-
-    private void Update()
-    {
-        //if (IsMoving)
-        //{
-        //    MovingPassen();
-        //}
     }
 
     public void MovingPassen()
@@ -92,14 +86,43 @@ public class LevelManager : Singleton<LevelManager>
         }
     }
 
+    public bool IsAllEmpty()
+    {
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (!listParkSlot[i].IsEmpty)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool IsAllNotEmpty()
+    {
+        int index = 0;
+
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (!listParkSlot[i].IsEmpty)
+            {
+                index++;
+
+                if (index == listParkSlot.Count)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     public void ArrangeSkill()
     {
-        if (ListParkSlot[0].Car != null && !isVIP)
+        if (ListParkSlot != null && !isVIP)
         {
-            ChangeArrangePassenColorPos(ListParkSlot[0].ColorType);
-            //CheckPassenger(listParkSlot[0].Car);
-
             CheckArrangeSkill();
         }
         else if (isVIP)
@@ -119,18 +142,21 @@ public class LevelManager : Singleton<LevelManager>
         {
             if (!listParkSlot[i].IsEmpty)
             {
+                ChangeArrangePassenColorPos(ListParkSlot[i].Car);
                 CheckPassenger(listParkSlot[i].Car);
+                break;
             }
         }
     }
 
-    public void ChangeArrangePassenColorPos(ColorType colorType)
+    public void ChangeArrangePassenColorPos(CarControl car)
     {
         int index2 = 0;
 
         for (int i = 0; i < listPassen.Count; i++)
         {
-            if (listPassen[i].ColorType == colorType && !isVIP && index2 < ListParkSlot[0].Car.MaxPassen)
+            // && index2 < ListParkSlot[0].Car.MaxPassen
+            if (listPassen[i].ColorType == car.ColorType && !isVIP && index2 < car.MaxPassen)
             {
                 var temp = listPassen[index2];
                 var pos = listPassen[index2].transform.position;
@@ -179,7 +205,7 @@ public class LevelManager : Singleton<LevelManager>
         float speed = 15f;
 
         Vector3 carPos = new Vector3(car.transform.position.x, HeliCopTer.transform.position.y, car.transform.position.z);
-        Vector3 vipPos = new Vector3(vIPSlot.transform.position.x, HeliCopTer.transform.position.y, vIPSlot.transform.position.z);
+        Vector3 vipPos = new Vector3(vIPSlot.Destination.transform.position.x, HeliCopTer.transform.position.y, vIPSlot.Destination.transform.position.z);
         Vector3 endHeliPos = heliEndPos.transform.position;
 
         float t1 = Vector3.Distance(carPos, HeliCopTer.transform.position) / speed;
@@ -333,6 +359,90 @@ public class LevelManager : Singleton<LevelManager>
         }
     }
 
+    public void CheckPassenArrayLength()
+    {
+        int index = 0;
+
+        for (int i = 0; i < listAllCars.Count; i++)
+        {
+            index += (int)listAllCars[i].CarType;
+        }
+
+        passenArray = new Vector3[index];
+        passenArrayIndex = passenArray.Length - 1;
+    }
+
+    public void SpawnPassengers(CarControl car)
+    {
+        for (int i = 1; i <= (int)car.CarType; i++)
+        {
+            Vector3 newPos = spawnPos.position + new Vector3(passenArrayIndex, 0, 0);
+            Passengers passen = Instantiate(passenPrefabs, newPos, Quaternion.identity);
+
+            passen.SkinnedMeshRenderer.material = passen.ListColor[(int)car.ColorType];
+            passen.ColorType = car.ColorType;
+
+            ListPassen.Insert(0, passen); 
+            PassenArray[passenArrayIndex] = new Vector3(passen.transform.position.x, passen.transform.position.y, passen.transform.position.z);
+
+            passen.transform.rotation = Quaternion.Euler(0, -90, 0);
+            passen.transform.SetParent(spawnPos.transform);
+
+            PassenCount++;
+            passenArrayIndex--; 
+        }
+    }
+
+    public void AddCarsToList()
+    {
+        Vector3 forwardDirection = transform.forward;      
+        Vector3 rightDirection = transform.right;          
+        Vector3 leftDirection = -transform.right;
+
+        List<KeyValuePair<CarControl, float>> listCarDistances = new List<KeyValuePair<CarControl, float>>();
+
+        foreach (CarControl item in listAllCars)
+        {
+            float distance = Vector3.Distance(item.transform.position, carCenter.transform.position);
+
+            if (Physics.Raycast(transform.position, forwardDirection, out RaycastHit hitForward, rayDistance, layerMask))
+            {
+              
+            }
+            else
+            {
+                
+            }
+
+            if (Physics.Raycast(transform.position, rightDirection, out RaycastHit hitRight, rayDistance, layerMask))
+            {
+                
+            }
+            else
+            {
+                
+            }
+
+            if (Physics.Raycast(transform.position, leftDirection, out RaycastHit hitLeft, rayDistance, layerMask))
+            {
+               
+            }
+            else
+            {
+                
+            }
+
+            listCarDistances.Add(new KeyValuePair<CarControl, float>(item, distance));
+        }
+
+        listCarDistances = listCarDistances.OrderBy(car => car.Value).ToList();
+
+        for (int i = 0; i < listCarDistances.Count; i++)
+        {
+            SpawnPassengers(listCarDistances[i].Key);
+        }
+    }
+     
     public void AddUnlockParkSlot(ParkSlot parkSlot)
     {
         ListParkSlot.Add(parkSlot);
@@ -365,6 +475,11 @@ public class LevelManager : Singleton<LevelManager>
 
         var passenColor = GetFirstPassenColor();
 
+        if (color != passenColor && IsAllNotEmpty())
+        {
+            GameManager.Instance.Losing();
+        }
+
         while (color == passenColor)
         {
             MovingPassen();
@@ -387,13 +502,12 @@ public class LevelManager : Singleton<LevelManager>
             bool isMax = car.FillPassenger(listPassen[0]);
             //yield return new WaitForSeconds(0.76f);
 
-
             if (isMax)
             {
                 //StartCoroutine(car.DelayTurn(0.1f));
                 dictCar[color].Dequeue();
             }
-            
+
             listPassen.RemoveAt(0);
 
             passenColor = GetFirstPassenColor();
@@ -414,8 +528,12 @@ public class LevelManager : Singleton<LevelManager>
                 }
             }
 
-            //yield return new WaitForSeconds(0.2f);
             yield return new WaitForSeconds(0.11f);
+        }
+
+        if (color != passenColor && IsAllNotEmpty() && !isProgress)
+        {
+            GameManager.Instance.Losing();
         }
 
         isProgress = false;
@@ -438,64 +556,30 @@ public class LevelManager : Singleton<LevelManager>
         return ColorType.None;
     }
 
-    //public void CarChecking(CarControl car)
-    //{
-    //    //StartCoroutine(DelayCarTake(car));
+    public ParkPlate CheckEmptyParkSlot()
+    {
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (listParkSlot[i].IsEmpty)
+            {
+                //listParkSlot[i].ParkPlate.BoxCollider.enabled = true;
+                //listParkSlot[i].IsEmpty = false;
+                return listParkSlot[i].ParkPlate;
+            }
+        }
 
-    //    if (listPassen[0].ColorType == car.ColorType && !listPassen[0].IsMoving)
-    //    {
-    //        CarTakePassen(listPassen[0], car);
-    //    }
+        return null;
+    }
 
-    //    //else if (listPassen[0].IsMoving && listPassen[1].ColorType == car.ColorType)
-    //    //{
-    //    //    CarTakePassen(listPassen[1], car);
-    //    //}
-    //    //else
-    //    //{
-    //    //    return;
-    //    //}
-
-    //}
-
-    //public void PassenChecking(Passengers passen)
-    //{
-    //    for (int i = 0; i < listParkSlot.Count; i++)
-    //    {
-    //        if (listParkSlot[i].Car != null)
-    //        {
-    //            if (listParkSlot[i].Car.ColorType == passen.ColorType && listParkSlot[i].Car.CurrentPassen < listParkSlot[i].Car.MaxPassen)
-    //            {
-    //                //CarTakePassen(passen, listParkSlot[i].Car);
-    //                StartCoroutine(DelayCarTake(listParkSlot[i].Car));
-    //                return;
-    //            }
-    //        }
-    //    }
-    //}
-
-    //public IEnumerator DelayCarTake(CarControl carControl)
-    //{
-    //    int index = 0;
-
-    //    for (int i = 0; i < listPassen.Count; i++)
-    //    {
-    //        if (listPassen[i].ColorType == carControl.ColorType && i == index && index < carControl.MaxPassen)
-    //        {
-    //            if (carControl.CurrentPassen < carControl.MaxPassen)
-    //            {
-    //                index++;
-    //                CarTakePassen(listPassen[i], carControl);
-
-    //                isMoving = true;
-    //                yield return new WaitForSeconds(0.1f);
-    //            }
-    //        }
-    //        else
-    //        {
-    //            yield break;
-    //        }
-    //    }
-    //}
-
+    public void SetParkSlot(ParkPlate parkPlate)
+    {
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (listParkSlot[i].ParkPlate == parkPlate)
+            {
+                listParkSlot[i].IsEmpty = false;
+                listParkSlot[i].ParkPlate.BoxCollider.enabled = true;
+            }
+        }
+    }
 }

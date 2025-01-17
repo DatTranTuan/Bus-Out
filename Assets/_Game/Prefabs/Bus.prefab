@@ -278,8 +278,8 @@ GameObject:
   - component: {fileID: 8813956269924378352}
   - component: {fileID: 8813956269924378356}
   - component: {fileID: 8813956269924378314}
-  - component: {fileID: 8813956269924378313}
-  m_Layer: 0
+  - component: {fileID: 5493610101973028674}
+  m_Layer: 3
   m_Name: Bus
   m_TagString: Car
   m_Icon: {fileID: 0}
@@ -393,8 +393,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 4
   m_CollisionDetection: 0
---- !u!65 &8813956269924378313
-BoxCollider:
+--- !u!64 &5493610101973028674
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -403,9 +403,10 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.5643629, y: 1.334134, z: 3.8177605}
-  m_Center: {x: 0, y: 0.6682367, z: 0.07213354}
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: e38e80402400f1b4586aff868dc62b04, type: 2}
 --- !u!1001 &2888363403104338749
 PrefabInstance:
   m_ObjectHideFlags: 0

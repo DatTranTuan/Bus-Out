@@ -44,9 +44,12 @@ public class Passengers : MonoBehaviour
 
     public void ChangeAnim(string animName)
     {
-
-        /*anim.ResetTrigger(animName);
-        anim.SetTrigger(animName);*/
+        //if (currentAnimName != animName)
+        //{
+        //    anim.ResetTrigger(animName);
+        //    currentAnimName = animName;
+        //    anim.SetTrigger(currentAnimName);
+        //}
 
         anim.Play(animName);
 
@@ -85,7 +88,7 @@ public class Passengers : MonoBehaviour
         }
         else
         {
-            GameManager.Instance.CheckLosing();
+            GameManager.Instance.Losing();
         }
     }
 
