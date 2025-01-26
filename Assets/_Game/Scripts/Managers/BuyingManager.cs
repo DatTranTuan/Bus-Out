@@ -20,9 +20,11 @@ public class BuyingManager : Singleton<BuyingManager>
     [SerializeField] private Button arrangeBtn;
     [SerializeField] private Button buyArrangeBtn;
     [SerializeField] private Button backBuyArrangeBtn;
-    [SerializeField] private Button jumbleBtn;
-    [SerializeField] private Button buyJumbleBtn;
-    [SerializeField] private Button backBuyJumbleBtn;
+
+    //[SerializeField] private Button jumbleBtn;
+    //[SerializeField] private Button buyJumbleBtn;
+    //[SerializeField] private Button backBuyJumbleBtn;
+
     [SerializeField] private Button vIPBtn;
     [SerializeField] private Button buyVIPBtn;
     [SerializeField] private Button backBuyVIPBtn;
@@ -31,6 +33,7 @@ public class BuyingManager : Singleton<BuyingManager>
 
     [SerializeField] private Image arrangeNotifi;
     [SerializeField] private Image vIPNotifi;
+    [SerializeField] private Image outOfMoneyNotifi;
 
     [SerializeField] private Text coinText;
 
@@ -38,7 +41,7 @@ public class BuyingManager : Singleton<BuyingManager>
 
     private bool isBuying = false;
 
-    private int coin = 10;
+    private int coin;
 
     public ParkSlot ParkSlot { get => parkSlot; set => parkSlot = value; }
     public int Coin { get => coin; set => coin = value; }
@@ -47,6 +50,7 @@ public class BuyingManager : Singleton<BuyingManager>
 
     void Start()
     {
+       coin = GetCoins();
         UpdateCoin();
 
         buyParkSlotBtn.onClick.AddListener(ClickBuyParkSlotBtn);
@@ -56,9 +60,9 @@ public class BuyingManager : Singleton<BuyingManager>
         buyArrangeBtn.onClick.AddListener(ClickBuyArrangeBtn);
         backBuyArrangeBtn.onClick.AddListener(BackAllTut);
 
-        jumbleBtn.onClick.AddListener(JubmleSkillBtn);
-        buyJumbleBtn.onClick.AddListener(ClickBuyJumbleSkill);
-        backBuyJumbleBtn.onClick.AddListener(BackAllTut);
+        //jumbleBtn.onClick.AddListener(JubmleSkillBtn);
+        ////buyJumbleBtn.onClick.AddListener(ClickBuyJumbleSkill);
+        //backBuyJumbleBtn.onClick.AddListener(BackAllTut);
 
         vIPBtn.onClick.AddListener(VIPSkillBtn);
         buyVIPBtn.onClick.AddListener(ClickBuyVIPBtn);
@@ -67,6 +71,23 @@ public class BuyingManager : Singleton<BuyingManager>
         turboBtn.onClick.AddListener(TurboSkillBtn);
         buyTurboBtn.onClick.AddListener(ClickBuyTurboBtn);
 
+    }
+
+    public void CoinPlus()
+    {
+        coin += 5;
+        SaveCoins();
+    }
+
+    public int GetCoins()
+    {
+        return PlayerPrefs.GetInt("Coins"); 
+    }
+
+    public void SaveCoins()
+    {
+        PlayerPrefs.SetInt("Coins", coin); 
+        PlayerPrefs.Save();
     }
 
     public void UpdateCoin()
@@ -87,6 +108,21 @@ public class BuyingManager : Singleton<BuyingManager>
             coin -= 5;
             UpdateCoin();
             LevelManager.Instance.AddUnlockParkSlot(parkSlot);
+        }
+        else
+        {
+            outOfMoneyNotifi.gameObject.SetActive(true);
+
+            outOfMoneyNotifi.DOFade(1f, 0.5f).OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(0.5f, () =>
+                {
+                    outOfMoneyNotifi.DOFade(0, 0.5f).OnComplete(() =>
+                    {
+                        outOfMoneyNotifi.gameObject.SetActive(false);
+                    });
+                });
+            });
         }
 
         buyingParkSlotPanel.SetActive(false);
@@ -126,29 +162,44 @@ public class BuyingManager : Singleton<BuyingManager>
             UpdateCoin();
             LevelManager.Instance.ArrangeSkill();
         }
+        else
+        {
+            outOfMoneyNotifi.gameObject.SetActive(true);
+
+            outOfMoneyNotifi.DOFade(1f, 0.5f).OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(0.5f, () =>
+                {
+                    outOfMoneyNotifi.DOFade(0, 0.5f).OnComplete(() =>
+                    {
+                        outOfMoneyNotifi.gameObject.SetActive(false);
+                    });
+                });
+            });
+        }
 
         arrageSkillTut.SetActive(false);
         IsBuying = false;
     }
 
-    public void JubmleSkillBtn()
-    {
-        jumbleSkillTut.SetActive(true);
-        IsBuying = true;
-    }
+    //public void JubmleSkillBtn()
+    //{
+    //    jumbleSkillTut.SetActive(true);
+    //    IsBuying = true;
+    //}
 
-    public void ClickBuyJumbleSkill()
-    {
-        if (coin >= 5)
-        {
-            coin -= 5;
-            UpdateCoin();
-            LevelManager.Instance.JumbleSkill();
-        }
+    //public void ClickBuyJumbleSkill()
+    //{
+    //    if (coin >= 5)
+    //    {
+    //        coin -= 5;
+    //        UpdateCoin();
+    //        LevelManager.Instance.JumbleSkill();
+    //    }
 
-        jumbleSkillTut.SetActive(false);
-        IsBuying = false;
-    }
+    //    jumbleSkillTut.SetActive(false);
+    //    IsBuying = false;
+    //}
 
     public void VIPSkillBtn()
     {
@@ -160,12 +211,28 @@ public class BuyingManager : Singleton<BuyingManager>
     {
         if (coin >= 5)
         {
+            coin -= 5;
+            UpdateCoin();
+
             vIPNotifi.gameObject.SetActive(true);
             vIPNotifi.DOFade(1f, 0.5f);
 
-            coin -= 5;
-            UpdateCoin();
             LevelManager.Instance.IsVIP = true;
+        }
+        else
+        {
+            outOfMoneyNotifi.gameObject.SetActive(true);
+
+            outOfMoneyNotifi.DOFade(1f, 0.5f).OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(0.5f, () =>
+                {
+                    outOfMoneyNotifi.DOFade(0, 0.5f).OnComplete(() =>
+                    {
+                        outOfMoneyNotifi.gameObject.SetActive(false);
+                    });
+                });
+            });
         }
 
         vIPSkillTut.SetActive(false);

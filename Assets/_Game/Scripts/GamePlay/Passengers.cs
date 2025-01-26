@@ -71,13 +71,14 @@ public class Passengers : MonoBehaviour
 
             sequence.Append(transform.DOMove(carDestination, 0.25f).SetEase(Ease.Linear).OnComplete(() =>
             {
+                SoundManager.Instance.Play("GetIn");
                 carControl.UpdateText();
 
                 LevelManager.Instance.PassenCount--;
 
                 GameManager.Instance.UpdateCountSignText();
-                BuyingManager.Instance.Coin++;
-                BuyingManager.Instance.UpdateCoin();
+                //BuyingManager.Instance.Coin++;
+                //BuyingManager.Instance.UpdateCoin();
 
                 //passen.IsMoving = false;
 
@@ -94,7 +95,6 @@ public class Passengers : MonoBehaviour
 
     private void OnDestroy()
     {
-        //LevelManager.Instance.MovingPassen();
-        //LevelManager.Instance.KillTween();
+        //gameObject.SetActive(false);
     }
 }

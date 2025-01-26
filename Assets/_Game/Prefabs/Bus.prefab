@@ -1,5 +1,67 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &924920328796442459
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5617868555044593378}
+  m_Layer: 3
+  m_Name: Left Raycast
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5617868555044593378
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924920328796442459}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.7, y: 0.622, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8813956269924378358}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1209200238891561250
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 909795105677778657}
+  m_Layer: 3
+  m_Name: Right Raycast
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &909795105677778657
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209200238891561250}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.68, y: 0.622, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8813956269924378358}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1627946701485831158
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +340,7 @@ GameObject:
   - component: {fileID: 8813956269924378352}
   - component: {fileID: 8813956269924378356}
   - component: {fileID: 8813956269924378314}
-  - component: {fileID: 5493610101973028674}
+  - component: {fileID: 3138052681934755031}
   m_Layer: 3
   m_Name: Bus
   m_TagString: Car
@@ -301,6 +363,8 @@ Transform:
   - {fileID: 8813956268924094941}
   - {fileID: 8557030712178156493}
   - {fileID: 7384646821544031249}
+  - {fileID: 5617868555044593378}
+  - {fileID: 909795105677778657}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
@@ -370,13 +434,20 @@ MonoBehaviour:
   meshRenderer: {fileID: 8813956269924378352}
   smoke: {fileID: 7384646821544031248}
   arrowMark: {fileID: 8813956268924094942}
+  colider: {fileID: 3138052681934755031}
+  rb: {fileID: 8813956269924378314}
   colorType: 0
   leftCorner: {fileID: 0}
   rightCorner: {fileID: 0}
   firstPos: {x: 0, y: 0, z: 0}
-  speed: 25
+  speed: 28
   rotationSpeed: 300
   passenText: {fileID: 7674964199802732804}
+  leftRaycast: {fileID: 5617868555044593378}
+  righttRaycast: {fileID: 909795105677778657}
+  carLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!54 &8813956269924378314
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -389,24 +460,23 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 4
   m_CollisionDetection: 0
---- !u!64 &5493610101973028674
-MeshCollider:
+--- !u!65 &3138052681934755031
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8813956269924378353}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: e38e80402400f1b4586aff868dc62b04, type: 2}
+  serializedVersion: 2
+  m_Size: {x: 1.4897933, y: 1.3377964, z: 4.2140665}
+  m_Center: {x: -0.0002219677, y: 0.6700679, z: 0.087706566}
 --- !u!1001 &2888363403104338749
 PrefabInstance:
   m_ObjectHideFlags: 0

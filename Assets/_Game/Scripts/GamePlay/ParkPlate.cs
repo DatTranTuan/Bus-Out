@@ -4,24 +4,15 @@ using UnityEngine;
 
 public class ParkPlate : Singleton<ParkPlate>
 {
-    [SerializeField] private BoxCollider boxCollider;
+    //[SerializeField] private BoxCollider boxCollider;
     [SerializeField] private ParkSlot parkSlot;
+    [SerializeField] private Transform parkSlotPos;
+    [SerializeField] private Transform parkPlatePos;
 
     private CarControl car;
 
-    //private void OnTriggerExit(Collider other)
-    //{
-    //    if (other.CompareTag("Car"))
-    //    {
-    //        if (car.IsLeaving)
-    //        {
-    //            boxCollider.enabled = true;
-    //        }
-    //    }
-    //}
-
-
-    public BoxCollider BoxCollider { get => boxCollider; set => boxCollider = value; }
     public ParkSlot ParkSlot { get => parkSlot; set => parkSlot = value; }
     public CarControl Car { get => car; set => car = value; }
+    public Transform ParkSlotPos { get => parkSlotPos; set => parkSlotPos = value; }
+    public Transform ParkPlatePos { get => parkPlatePos; set => parkPlatePos = value; }
 }

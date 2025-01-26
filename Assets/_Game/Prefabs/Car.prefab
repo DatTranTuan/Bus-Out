@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &180254198635704299
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1840877253505696417}
+  m_Layer: 3
+  m_Name: Right Raycast
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1840877253505696417
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180254198635704299}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.68, y: 0.622, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4845218725700889545}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &263248681583413124
 GameObject:
   m_ObjectHideFlags: 0
@@ -80,6 +111,37 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 0/10
+--- !u!1 &400163022065976237
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 846825064873863116}
+  m_Layer: 3
+  m_Name: Left Raycast
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &846825064873863116
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400163022065976237}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.7, y: 0.622, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4845218725700889545}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2519162614272214398
 GameObject:
   m_ObjectHideFlags: 0
@@ -194,7 +256,7 @@ GameObject:
   - component: {fileID: 4845218725700889559}
   - component: {fileID: 4845218725700889544}
   - component: {fileID: 4845218725700889546}
-  - component: {fileID: 6064263084205472136}
+  - component: {fileID: 9141734098377269402}
   m_Layer: 3
   m_Name: Car
   m_TagString: Car
@@ -217,6 +279,8 @@ Transform:
   - {fileID: 4845218727314355552}
   - {fileID: 4783063451139323238}
   - {fileID: 2433185197378017715}
+  - {fileID: 846825064873863116}
+  - {fileID: 1840877253505696417}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
@@ -286,13 +350,20 @@ MonoBehaviour:
   meshRenderer: {fileID: 4845218725700889559}
   smoke: {fileID: 2433185197378017714}
   arrowMark: {fileID: 4845218727314355553}
+  colider: {fileID: 9141734098377269402}
+  rb: {fileID: 4845218725700889546}
   colorType: 2
   leftCorner: {fileID: 0}
   rightCorner: {fileID: 0}
   firstPos: {x: 0, y: 0, z: 0}
-  speed: 25
+  speed: 28
   rotationSpeed: 120
   passenText: {fileID: 8668352081261730673}
+  leftRaycast: {fileID: 846825064873863116}
+  righttRaycast: {fileID: 1840877253505696417}
+  carLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!54 &4845218725700889546
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -305,24 +376,23 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 4
   m_CollisionDetection: 0
---- !u!64 &6064263084205472136
-MeshCollider:
+--- !u!65 &9141734098377269402
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4845218725700889556}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: c8979d882dad6aa459804f78061be951, type: 2}
+  serializedVersion: 2
+  m_Size: {x: 1.4992694, y: 1.2166078, z: 2.5890012}
+  m_Center: {x: 0.0042655766, y: 0.6094736, z: -0.012589812}
 --- !u!1 &4845218727314355553
 GameObject:
   m_ObjectHideFlags: 0

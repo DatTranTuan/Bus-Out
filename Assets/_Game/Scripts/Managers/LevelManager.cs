@@ -36,15 +36,14 @@ public class LevelManager : Singleton<LevelManager>
 
     [SerializeField] private bool isVIP = false;
 
-    [SerializeField] private CarControl carCenter;
     [SerializeField] private GameObject allCars;
 
     [SerializeField] private float rayDistance;
     [SerializeField] private LayerMask layerMask;
 
-    private int passenCount = 0;
+    private int passenCount;
 
-    private int carTouchCount = 0;
+    //private int carTouchCount = 0;
 
     public List<Passengers> ListPassen { get => listPassen; set => listPassen = value; }
     public List<ParkPlate> ListPlate { get => listPlate; set => listPlate = value; }
@@ -55,15 +54,269 @@ public class LevelManager : Singleton<LevelManager>
     public GameObject HeliCopTer { get => heliCopTer; set => heliCopTer = value; }
     public int PassenCount { get => passenCount; set => passenCount = value; }
     public Vector3[] PassenArray { get => passenArray; set => passenArray = value; }
-    public int CarTouchCount { get => carTouchCount; set => carTouchCount = value; }
+    public LayerMask LayerMask { get => layerMask; set => layerMask = value; }
+    public List<CarControl> ListCars { get => listCars; set => listCars = value; }
+
+    //public int CarTouchCount { get => carTouchCount; set => carTouchCount = value; }
 
     private void Start()
     {
+        //CheckPassenArrayLength();
+
+        //StartCoroutine(SpawnPassenger());
+
+        //LoadLevel();
+    }
+
+    public void LoadLevel()
+    {
+        if (listCars.Count > 0)
+        {
+            listCars.Clear();
+        }
+
+        if (DataManager.Instance.CurrentLevel == 1)
+        {
+            GameManager.Instance.Map1.SetActive(true);
+
+            CarControl[] carControls = GameManager.Instance.Map1.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map1.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+        else if (DataManager.Instance.CurrentLevel == 2)
+        {
+            GameManager.Instance.Map2.SetActive(true);
+
+            CarControl[] carControls = GameManager.Instance.Map2.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map2.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+        else if (DataManager.Instance.CurrentLevel == 3)
+        {
+            GameManager.Instance.Map3.SetActive(true);
+            GameManager.Instance.Map2.SetActive(false);
+
+
+            CarControl[] carControls = GameManager.Instance.Map3.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map3.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+        else if (DataManager.Instance.CurrentLevel == 4)
+        {
+            GameManager.Instance.Map4.SetActive(true);
+            GameManager.Instance.Map3.SetActive(false);
+
+
+            CarControl[] carControls = GameManager.Instance.Map4.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map4.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+        else if (DataManager.Instance.CurrentLevel == 5)
+        {
+            GameManager.Instance.Map5.SetActive(true);
+            GameManager.Instance.Map4.SetActive(false);
+
+            CarControl[] carControls = GameManager.Instance.Map5.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map5.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+    }
+
+    public void NextLevel()
+    {
+        DataManager.Instance.CurrentLevel++;
+
+        listAllCars.Clear();
+
+        if (GameManager.Instance.Map1.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map2.GetComponentsInChildren<CarControl>();
+
+            listAllCars.AddRange(carControls);
+
+            GameManager.Instance.Map1.SetActive(false);
+            GameManager.Instance.Map2.SetActive(true);
+        }
+        else if (GameManager.Instance.Map2.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map3.GetComponentsInChildren<CarControl>();
+
+            listAllCars.AddRange(carControls);
+
+            GameManager.Instance.Map2.SetActive(false);
+            GameManager.Instance.Map3.SetActive(true);
+        }
+        else if (GameManager.Instance.Map3.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map4.GetComponentsInChildren<CarControl>();
+
+            listAllCars.AddRange(carControls);
+
+            GameManager.Instance.Map3.SetActive(false);
+            GameManager.Instance.Map4.SetActive(true);
+        }
+        else if (GameManager.Instance.Map4.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map5.GetComponentsInChildren<CarControl>();
+
+            listAllCars.AddRange(carControls);
+
+            GameManager.Instance.Map4.SetActive(false);
+            GameManager.Instance.Map5.SetActive(true);
+        }
+        else if (GameManager.Instance.Map5.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map1.GetComponentsInChildren<CarControl>();
+
+            listAllCars.AddRange(carControls);
+
+            GameManager.Instance.Map5.SetActive(false);
+            GameManager.Instance.Map1.SetActive(true);
+        }
+
+        passenArray = new Vector3[passenCount];
+        dictCar.Clear();
+        PassenCount = 0;
+
         CheckPassenArrayLength();
+        StartCoroutine(SpawnPassenger());
+    }
 
-        AddCarsToList();
+    public void ReplayLevel()
+    {
+        if (listCars.Count > 0)
+        {
+            listCars.Clear();
+        }
 
-        GameManager.Instance.UpdateCountSignText();
+        if (GameManager.Instance.Map1.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map1.GetComponentsInChildren<CarControl>(true);
+
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map1.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+        }
+        else if (GameManager.Instance.Map2.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map2.GetComponentsInChildren<CarControl>(true);
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map2.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+
+        }
+        else if (GameManager.Instance.Map3.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map3.GetComponentsInChildren<CarControl>(true);
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map3.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+
+        }
+        else if (GameManager.Instance.Map4.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map4.GetComponentsInChildren<CarControl>(true);
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map4.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+
+        }
+        else if (GameManager.Instance.Map5.activeInHierarchy)
+        {
+            CarControl[] carControls = GameManager.Instance.Map5.GetComponentsInChildren<CarControl>(true);
+            ListCars.AddRange(carControls);
+
+            CarControl[] carControl = GameManager.Instance.Map5.GetComponentsInChildren<CarControl>(true);
+
+            listAllCars.AddRange(carControl);
+
+            ReMoveAllCars();
+
+        }
+
+       
+    }
+
+    public void ReMoveAllCars()
+    {
+        for (int i = 0; i < ListCars.Count; i++)
+        {
+            //listCars[i].gameObject.SetActive(true);
+
+            if (ListCars[i].IsLeaving || ListCars[i].IsTurning || ListCars[i].IsMoving)
+            {
+                ListCars[i].Respawn();
+            }
+
+            //listCars.RemoveAt(i);
+        }
+
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            listParkSlot[i].IsEmpty = true;
+            listParkSlot[i].Car = null;
+        }
+
+        for (int i = 0; i < listPassen.Count; i++)
+        {
+            //listPassen.RemoveAt(i);
+            Destroy(listPassen[i].gameObject);
+        }
+
+
+        listPassen.Clear();
+        passenArray = new Vector3[passenCount];
+        dictCar.Clear();
+        PassenCount = 0;
+
+        CheckPassenArrayLength();
+        StartCoroutine(SpawnPassenger());
     }
 
     public void MovingPassen()
@@ -86,6 +339,19 @@ public class LevelManager : Singleton<LevelManager>
         }
     }
 
+    public bool IsOneEmpty()
+    {
+        for (int i = 0; i < listParkSlot.Count; i++)
+        {
+            if (listParkSlot[i].IsEmpty)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool IsAllEmpty()
     {
         for (int i = 0; i < listParkSlot.Count; i++)
@@ -105,7 +371,7 @@ public class LevelManager : Singleton<LevelManager>
 
         for (int i = 0; i < listParkSlot.Count; i++)
         {
-            if (!listParkSlot[i].IsEmpty)
+            if (listParkSlot[i].Car != null && !listParkSlot[i].IsEmpty)
             {
                 index++;
 
@@ -153,10 +419,11 @@ public class LevelManager : Singleton<LevelManager>
     {
         int index2 = 0;
 
+        int max = car.MaxPassen - car.CurrentPassen;
+
         for (int i = 0; i < listPassen.Count; i++)
         {
-            // && index2 < ListParkSlot[0].Car.MaxPassen
-            if (listPassen[i].ColorType == car.ColorType && !isVIP && index2 < car.MaxPassen)
+            if (listPassen[i].ColorType == car.ColorType && !isVIP && index2 < max)
             {
                 var temp = listPassen[index2];
                 var pos = listPassen[index2].transform.position;
@@ -218,6 +485,7 @@ public class LevelManager : Singleton<LevelManager>
 
         Sequence sequence1 = DOTween.Sequence();
 
+        SoundManager.Instance.Play("Heli");
         sequence1.Append(HeliCopTer.transform.DOMove(carPos, t1).SetEase(Ease.InOutCubic).OnComplete(() =>
         {
             vipPos = new Vector3(vIPSlot.transform.position.x, HeliCopTer.transform.position.y, vIPSlot.transform.position.z);
@@ -255,43 +523,39 @@ public class LevelManager : Singleton<LevelManager>
 
             if (Vector3.Distance(currentObject.transform.position, targetPosition) > 0.01f)
             {
-                //listPassen[i].ChangeAnim("Run");
                 currentObject.transform.position = targetPosition;
             }
-            else
-            {
-                //listPassen[i].ChangeAnim("Idle");
-            }
-
         }
     }
 
-    public void JumbleSkill()
-    {
-        int randomIndex;
+    //public void JumbleSkill()
+    //{
+    //    int randomIndex;
 
-        for (int i = 0; i < listCars.Count; i++)
-        {
-            if (listCars[i].CarType == CarType.Car)
-            {
-                randomIndex = Random.Range(0, 4);
-                listCars[i].MeshRenderer.material = listCarMaterial[randomIndex];
-                listCars[i].ColorType = (ColorType)randomIndex;
-            }
-            else if (listCars[i].CarType == CarType.Van)
-            {
-                randomIndex = Random.Range(0, 4);
-                listCars[i].MeshRenderer.material = listVanMaterial[randomIndex];
-                listCars[i].ColorType = (ColorType)randomIndex;
-            }
-            else
-            {
-                randomIndex = Random.Range(0, 4);
-                listCars[i].MeshRenderer.material = listBusMaterial[randomIndex];
-                listCars[i].ColorType = (ColorType)randomIndex;
-            }
-        }
-    }
+    //    for (int i = 0; i < listAllCars.Count; i++)
+    //    {
+    //        if (listAllCars[i].CarType == CarType.Car)
+    //        {
+    //            randomIndex = Random.Range(0, 4);
+    //            listAllCars[i].MeshRenderer.material = listCarMaterial[randomIndex];
+    //            listAllCars[i].ColorType = (ColorType)randomIndex;
+    //        }
+    //        else if (listAllCars[i].CarType == CarType.Van)
+    //        {
+    //            randomIndex = Random.Range(0, 4);
+    //            listAllCars[i].MeshRenderer.material = listVanMaterial[randomIndex];
+    //            listAllCars[i].ColorType = (ColorType)randomIndex;
+    //        }
+    //        else
+    //        {
+    //            randomIndex = Random.Range(0, 4);
+    //            listAllCars[i].MeshRenderer.material = listBusMaterial[randomIndex];
+    //            listAllCars[i].ColorType = (ColorType)randomIndex;
+    //        }
+    //    }
+
+    //    AddCarsToList();
+    //}
 
     public void TurboSkill()
     {
@@ -300,9 +564,9 @@ public class LevelManager : Singleton<LevelManager>
             listPassen[i].Speed *= 2;
         }
 
-        for (int i = 0; i < listCars.Count; i++)
+        for (int i = 0; i < ListCars.Count; i++)
         {
-            listCars[i].Speed *= 2;
+            ListCars[i].Speed *= 2;
         }
     }
 
@@ -313,51 +577,12 @@ public class LevelManager : Singleton<LevelManager>
             listPassen[i].Speed /= 2;
         }
 
-        for (int i = 0; i < listCars.Count; i++)
+        for (int i = 0; i < ListCars.Count; i++)
         {
-            listCars[i].Speed /= 2;
+            ListCars[i].Speed /= 2;
         }
     }
 
-    public void SpawnPassen()
-    {
-        // Sinh ra hanh khach
-
-        for (int i = 1; i <= 42; i++)
-        {
-            Vector3 newPos = spawnPos.position + new Vector3(i, 0, 0);
-            Passengers passen = Instantiate(passenPrefabs, newPos, Quaternion.identity);
-
-            if (i == 5 || i == 2 || i == 19 || i == 22)
-            {
-                passen.SkinnedMeshRenderer.material = passen.ListColor[2];
-                passen.ColorType = ColorType.Red;
-            }
-            else if (i == 10 || i == 3 || i == 16 || i == 27 || i == 6 || i == 1 || i == 12 || i == 30)
-            {
-                passen.SkinnedMeshRenderer.material = passen.ListColor[1];
-                passen.ColorType = ColorType.Green;
-            }
-            else if (i == 18 || i == 9 || i == 25 || i == 8 || i == 14 || i == 21 || i == 7 || i == 11)
-            {
-                passen.SkinnedMeshRenderer.material = passen.ListColor[3];
-                passen.ColorType = ColorType.Purple;
-            }
-            else
-            {
-                passen.SkinnedMeshRenderer.material = passen.ListColor[0];
-                passen.ColorType = ColorType.Blue;
-            }
-
-            ListPassen.Add(passen);
-            PassenArray[i - 1] = new Vector3(passen.transform.position.x, passen.transform.position.y, passen.transform.position.z);
-
-            passen.transform.rotation = Quaternion.Euler(0, -90, 0);
-            passen.transform.SetParent(spawnPos.transform);
-
-            PassenCount++;
-        }
-    }
 
     public void CheckPassenArrayLength()
     {
@@ -369,93 +594,149 @@ public class LevelManager : Singleton<LevelManager>
         }
 
         passenArray = new Vector3[index];
-        passenArrayIndex = passenArray.Length - 1;
+        //passenArrayIndex = passenArray.Length - 1;
+        passenArrayIndex = 0;
     }
 
-    public void SpawnPassengers(CarControl car)
+    public void SpawnPassengers(List<CarControl> carList)
     {
-        for (int i = 1; i <= (int)car.CarType; i++)
+        List<ColorType> listColorType = new List<ColorType>();
+
+        foreach (var item in carList)
+        {
+            listColorType.AddRange(Enumerable.Repeat(item.ColorType, item.MaxPassen));
+        }
+
+        //listColorType.Shuffle();
+
+        for (int i = 0; i < listColorType.Count; i++)
         {
             Vector3 newPos = spawnPos.position + new Vector3(passenArrayIndex, 0, 0);
             Passengers passen = Instantiate(passenPrefabs, newPos, Quaternion.identity);
 
-            passen.SkinnedMeshRenderer.material = passen.ListColor[(int)car.ColorType];
-            passen.ColorType = car.ColorType;
+            passen.SkinnedMeshRenderer.material = passen.ListColor[(int)listColorType[i]];
+            passen.ColorType = listColorType[i];
 
-            ListPassen.Insert(0, passen); 
+            //ListPassen.Insert(0, passen);
+            listPassen.Add(passen);
             PassenArray[passenArrayIndex] = new Vector3(passen.transform.position.x, passen.transform.position.y, passen.transform.position.z);
 
             passen.transform.rotation = Quaternion.Euler(0, -90, 0);
             passen.transform.SetParent(spawnPos.transform);
 
             PassenCount++;
-            passenArrayIndex--; 
+            passenArrayIndex++;
+
+            //yield return new WaitForSeconds(1f);
         }
     }
 
-    public void AddCarsToList()
+    public IEnumerator SpawnPassenger()
     {
-        Vector3 forwardDirection = transform.forward;      
-        Vector3 rightDirection = transform.right;          
-        Vector3 leftDirection = -transform.right;
+        List<CarControl> listCarControl = new List<CarControl>();
 
-        List<KeyValuePair<CarControl, float>> listCarDistances = new List<KeyValuePair<CarControl, float>>();
+        listAllCars.Shuffle();
 
-        foreach (CarControl item in listAllCars)
+        while (listAllCars.Count > 0)
         {
-            float distance = Vector3.Distance(item.transform.position, carCenter.transform.position);
+            for (int i = listAllCars.Count - 1; i >= 0; i--)
+            {
+                CarControl item = listAllCars[i];
 
-            if (Physics.Raycast(transform.position, forwardDirection, out RaycastHit hitForward, rayDistance, layerMask))
-            {
-              
-            }
-            else
-            {
-                
+                //Ray ray = new Ray(item.transform.position + new Vector3(0, 0.5f, 0), item.transform.forward);
+
+                //bool resultCount = Physics.Raycast(ray, 50f, LayerMask, QueryTriggerInteraction.Ignore);
+
+                Ray rightRay = new Ray(item.LeftRaycast.position, item.transform.forward);
+                Ray leftRay = new Ray(item.RighttRaycast.position, item.transform.forward);
+
+                Debug.DrawRay(leftRay.origin, leftRay.direction * 10f, Color.black, 100f);
+                Debug.DrawRay(rightRay.origin, rightRay.direction * 10f, Color.red, 100f);
+
+                bool leftResult = Physics.Raycast(leftRay, 500f, layerMask, QueryTriggerInteraction.Ignore);
+                bool rightResult = Physics.Raycast(rightRay, 500f, layerMask, QueryTriggerInteraction.Ignore);
+
+                //Debug.DrawRay(ray.origin, ray.direction * 10f, item.MeshRenderer.material.color, 100f);
+
+
+                if (!leftResult && !rightResult)
+                {
+                    listCarControl.Add(item);
+
+                    //SpawnPassengers(item);
+                    listAllCars.RemoveAt(i);
+
+                    item.Active();
+
+                    //item.MeshRenderer.material.color = Color.white;
+
+                    //item.gameObject.SetActive(false);
+                    //yield return new WaitForSeconds(1f);  
+                }
             }
 
-            if (Physics.Raycast(transform.position, rightDirection, out RaycastHit hitRight, rayDistance, layerMask))
-            {
-                
-            }
-            else
-            {
-                
-            }
-
-            if (Physics.Raycast(transform.position, leftDirection, out RaycastHit hitLeft, rayDistance, layerMask))
-            {
-               
-            }
-            else
-            {
-                
-            }
-
-            listCarDistances.Add(new KeyValuePair<CarControl, float>(item, distance));
+            yield return null;
         }
 
-        listCarDistances = listCarDistances.OrderBy(car => car.Value).ToList();
-
-        for (int i = 0; i < listCarDistances.Count; i++)
+        if (GameManager.Instance.Map1 != null && GameManager.Instance.Map1.activeInHierarchy)
         {
-            SpawnPassengers(listCarDistances[i].Key);
+            for (int i = 0; i < listCarControl.Count; i++)
+            {
+                List<CarControl> listCar = new List<CarControl>();
+                listCar.Add(listCarControl[i]);
+                SpawnPassengers(listCar);
+
+                yield return null;
+            }
         }
+        else
+        {
+            for (int i = 0; i < listCarControl.Count - 3; i += 3)
+            {
+                List<CarControl> listCar = new List<CarControl>();
+                listCar.Add(listCarControl[i]);
+
+                if (i + 1 < listCarControl.Count)
+                {
+                    listCar.Add(listCarControl[i + 1]);
+                }
+
+                if (i + 2 < listCarControl.Count)
+                {
+                    listCar.Add(listCarControl[i + 2]);
+                }
+
+                SpawnPassengers(listCar);
+                //StartCoroutine(SpawnPassengers(listCar));
+
+                yield return null;
+            }
+        }
+
+
+        GameManager.Instance.UpdateCountSignText();
+
+        //listCarDistances = listCarDistances.OrderBy(car => car.Value).ToList();
+
+        //for (int i = 0; i < listCarDistances.Count; i++)
+        //{
+        //    SpawnPassengers(listCarDistances[i].Key);
+        //}
     }
-     
+
     public void AddUnlockParkSlot(ParkSlot parkSlot)
     {
         ListParkSlot.Add(parkSlot);
         parkSlot.SpriteRenderer.sprite = parkSlot.UnlockSprite;
         parkSlot.IsLocked = false;
-        parkSlot.ParkPlate.BoxCollider.enabled = true;
+        //parkSlot.ParkPlate.BoxCollider.enabled = true;
     }
 
     public void CheckPassenger(CarControl car)
     {
         var color = car.ColorType;
 
-        if (!dictCar.ContainsKey(color))
+        if (!dictCar.ContainsKey(color) && car != null)
         {
             dictCar.Add(color, new Queue<CarControl>());
         }
@@ -500,15 +781,17 @@ public class LevelManager : Singleton<LevelManager>
             }
 
             bool isMax = car.FillPassenger(listPassen[0]);
-            //yield return new WaitForSeconds(0.76f);
+
+            if (color == passenColor)
+            {
+                listPassen.RemoveAt(0);
+            }
 
             if (isMax)
             {
-                //StartCoroutine(car.DelayTurn(0.1f));
                 dictCar[color].Dequeue();
+                dictCar.Remove(color);
             }
-
-            listPassen.RemoveAt(0);
 
             passenColor = GetFirstPassenColor();
 
@@ -531,19 +814,21 @@ public class LevelManager : Singleton<LevelManager>
             yield return new WaitForSeconds(0.11f);
         }
 
-        if (color != passenColor && IsAllNotEmpty() && !isProgress)
-        {
-            GameManager.Instance.Losing();
-        }
-
         isProgress = false;
 
         yield return new WaitForSeconds(0.36f);
 
+        //if (color != passenColor && IsAllNotEmpty() && !isProgress)
+        //{
+        //    GameManager.Instance.Losing();
+        //}
+
+
         if (ListPassen.Count <= 0)
         {
-            GameManager.Instance.WinningPanel.SetActive(true);
+            GameManager.Instance.Winning();
         }
+
     }
 
     private ColorType GetFirstPassenColor()
@@ -563,7 +848,7 @@ public class LevelManager : Singleton<LevelManager>
             if (listParkSlot[i].IsEmpty)
             {
                 //listParkSlot[i].ParkPlate.BoxCollider.enabled = true;
-                //listParkSlot[i].IsEmpty = false;
+                listParkSlot[i].IsEmpty = false;
                 return listParkSlot[i].ParkPlate;
             }
         }
@@ -578,8 +863,29 @@ public class LevelManager : Singleton<LevelManager>
             if (listParkSlot[i].ParkPlate == parkPlate)
             {
                 listParkSlot[i].IsEmpty = false;
-                listParkSlot[i].ParkPlate.BoxCollider.enabled = true;
+                //listParkSlot[i].ParkPlate.BoxCollider.enabled = true;
             }
+        }
+    }
+}
+
+public static class ListExtension
+{
+    /// <summary>
+    /// Shuffles the elements of a list in-place using Unity's Random.Range.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the list.</typeparam>
+    /// <param name="list">The list to shuffle.</param>
+    public static void Shuffle<T>(this IList<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1); // Random index between 0 and i (inclusive)
+
+            // Swap elements at i and j
+            T temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
         }
     }
 }
