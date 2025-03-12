@@ -782,10 +782,7 @@ public class LevelManager : Singleton<LevelManager>
 
             bool isMax = car.FillPassenger(listPassen[0]);
 
-            if (color == passenColor)
-            {
-                listPassen.RemoveAt(0);
-            }
+            listPassen.RemoveAt(0);
 
             if (isMax)
             {
